@@ -1,5 +1,7 @@
 import os
 import json
+import subprocess
+import time
 from getpass import getpass
 from termcolor import colored as col
 
@@ -28,7 +30,7 @@ def start():
     print(col("\nSummary:", "cyan"))
     print(col("* Backup:", "cyan"))
     for c in cart:
-        os.system("du -sh "+c)
+        subprocess.call(["du","-sh", c], shell=False)
 
     print(col("* Backup saved temporarily in "+SAVEFOLDER+"", "cyan"))
     print(col("* SCP to "+IP_SSH+"", "cyan"))
@@ -36,27 +38,32 @@ def start():
 
     inp = input(col("Do you want to proced? [y/n] ", "cyan"))
     if inp != "y" and inp != "Y":
-        print(col("Abort", "orange"))
+        print(col("Abort", "red"))
         return 1
 
     #COMPRESSIONE E INVIO
     err = 0
     for c in cart:
-        nomeCompr = SAVEFOLDER+"/"+c.split("/")[-1]+".tar.bz2"
-        res = os.system("tar -I \"pbzip2 -p4\" -cvf "+nomeCompr+" "+c)
+        nome_tar = SAVEFOLDER+"/"+c.split("/")[-1]+".tar"
+        nome_tar_bz2 = nome_tar+".bz2"
+        res = subprocess.call(["tar", "-cvf", nome_tar, c], shell=False)
+        res = subprocess.call(["pbzip2", "-v","-f", "-p4", nome_tar], shell=False)
+        # res = os.system("tar -I \"pbzip2 -p4\" -cvf "+nome_tar+" "+c)
         if res != 0:
-            print(col("\nERROR compression "+nomeCompr+" failed. Abort","red"))
+            print(col("\nERROR compression "+nome_tar+" failed. Abort","red"))
             err = 1
             break
         print(col("\n***** COMPRESSION COMPLETED *****\n","green"))
 
-        res = os.system("sshpass -p '"+PASSW+"' scp -v "+nomeCompr+" "+USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH)
+        res = subprocess.call(["sshpass","-p", PASSW, "scp", "-v", nome_tar_bz2, USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH], shell=False)
+        # res = os.system("sshpass -p '"+PASSW+"' scp -v "+nome_tar+" "+USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH)
         if res != 0:
             print(col("\nERROR send file "+c.split("/")[-1]+".tar.bz2 via ssh failed. Abort","red"))
             err=1
             break
         print(col("\n***** SEND SSH COMPLETED *****\n","green"))
-        os.system("rm "+nomeCompr)
+        subprocess.call(["rm", nome_tar_bz2], shell=False)
+        # os.system("rm "+nome_tar)
 
     if(err == 0):
         print(col("\n\n*******************************", "green"))
@@ -64,11 +71,11 @@ def start():
         print(col("*******************************\n", "green"))
         if shut == 1:
             print("Shutting down...")
-            os.system("sleep 5")
-            os.system("shutdown now")
+            time.sleep(5)
+            subprocess.call(["shutdown", "now"], shell=False) 
     else:
         print(col("\n\n*******************************", "red"))
-        print(col("!!!!    ERRORS DETECTED    !!!!", "red"))
+        print(col("!!!!     ERROR DETECTED    !!!!", "red"))
         print(col("*******************************\n", "red"))
         return -1
 
@@ -106,12 +113,12 @@ def read_psw():
 
 def check_conn_ssh():
     print("Checking ssh connection...")
-    ping = os.system("ping -c 1 "+IP_SSH+" > /dev/null 2>&1")
+    ping = subprocess.call(["ping","-c 1", IP_SSH], stdout=subprocess.DEVNULL, shell=False)
     if ping == 0:
         print(col("Connection ok\n","green"))
         return 0
     else:
-        print(col("Ssh host seems offline. Abort","red"))
+        print(col("SSh host seems offline. Abort","red"))
         return -1
 
 
