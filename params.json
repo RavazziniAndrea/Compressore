@@ -1,17 +1,15 @@
 {
     "params": {
         "folder_to_backup" : [
-            "FULL PATH TO THE FOLDER",
-            "FULL PATH TO THE FOLDER",
-            "FULL PATH TO THE FOLDER",
-            "..."
+            "/home/andrea/Stuff/cartellabella/CartellaGrossa",
+            "/home/andrea/Stuff/cartellabella/CartellaGrossona"
         ],
-        "tmp_store_folder" : "FULL PATH TO THE FOLDER THAT STORES TEMPORARILY THE 'FILE.tar.bz2' GENERATED",
+        "tmp_store_folder" : "/home/andrea/Stuff/BackupTmp",
         "ssh" : {
-            "ip" : "IP OF THE SERVER",
-            "user" : "USER", 
-            "folder" : "PATH (FROM THE BASE FOLDER) TO THE LOCATION WHERE ALL BACKUPS ARE GOING TO BE STORED"
+            "ip" : "10.0.54.42",
+            "user" : "pi", 
+            "folder" : "Stuff"
         },
-        "log_folder" : "FOLDER TO WRITE THE .log FILE"
+        "log_folder" : "/home/andrea/Stuff/"
     }
 }

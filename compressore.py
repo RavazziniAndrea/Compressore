@@ -7,34 +7,34 @@ from termcolor import colored as col
 def start():
 
     print(col("\n*****************************","green"))
-    print(col("** INIZIO PROGRAMMA BACKUP **","green"))
+    print(col("**   COMPRESSORE STARTED   **","green"))
     print(col("*****************************\n","green"))
 
     try:
-        leggiParams()
+        read_params()
     except:
-        print(col("Errore lettura parametri. Abort", "red"))
+        print(col("Error reading parameters. Abort", "red"))
         return -1
 
-    if checkConnPI() == -1: return -1
-    PASSW = readPsw()
+    if check_conn_ssh() == -1: return -1
+    PASSW = read_psw()
 
-    cart = selezioneCartelle()
+    cart = select_folders()
     if len(cart) < 1:
-        print(col("Nessuna cartella selezionata per il backup. Fine","yellow"))
+        print(col("No file/folder selected. Quit","yellow"))
         return 1
-    shut = getShutdown()
+    shut = get_shutdown()
 
-    print(col("\nRiepilogo:", "cyan"))
-    print(col("* Backup di:", "cyan"))
+    print(col("\nSummary:", "cyan"))
+    print(col("* Backup:", "cyan"))
     for c in cart:
         os.system("du -sh "+c)
 
-    print(col("* Backup salvato in "+SAVEFOLDER+"", "cyan"))
+    print(col("* Backup saved temporarily in "+SAVEFOLDER+"", "cyan"))
     print(col("* SCP to "+IP_SSH+"", "cyan"))
-    print(col("* Spegnimento al termine? " +("yes" if shut == 1 else "no")+ "\n", "cyan"))
+    print(col("* Shutdown at the end? " +("yes" if shut == 1 else "no")+ "\n", "cyan"))
 
-    inp = input(col("Procedere? [y/n] ", "cyan"))
+    inp = input(col("Do you want to proced? [y/n] ", "cyan"))
     if inp != "y" and inp != "Y":
         print(col("Abort", "orange"))
         return 1
@@ -45,35 +45,36 @@ def start():
         nomeCompr = SAVEFOLDER+"/"+c.split("/")[-1]+".tar.bz2"
         res = os.system("tar -I \"pbzip2 -p4\" -cvf "+nomeCompr+" "+c)
         if res != 0:
-            print(col("\nERRORE compressione "+nomeCompr+" non riuscita. Abort","red"))
+            print(col("\nERROR compression "+nomeCompr+" failed. Abort","red"))
             err = 1
             break
-        print("\n*** COMPRESSIONE COMPLETATA ***\n\n")
+        print(col("\n***** COMPRESSION COMPLETED *****\n","green"))
 
         res = os.system("sshpass -p '"+PASSW+"' scp -v "+nomeCompr+" "+USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH)
         if res != 0:
-            print(col("\nERRORE invio file "+c.split("/")[-1]+".tar.bz2 via ssh. Abort","red"))
+            print(col("\nERROR send file "+c.split("/")[-1]+".tar.bz2 via ssh failed. Abort","red"))
             err=1
             break
+        print(col("\n***** SEND SSH COMPLETED *****\n","green"))
         os.system("rm "+nomeCompr)
 
     if(err == 0):
-        print(col("\n\n******************************", "green"))
-        print(col("***    BACKUP TERMINATO    ***", "green"))
-        print(col("******************************\n", "green"))
+        print(col("\n\n*******************************", "green"))
+        print(col("***  COMPRESSORE TERMINATED ***", "green"))
+        print(col("*******************************\n", "green"))
         if shut == 1:
-            print("Procedo con lo spegnimento...")
+            print("Shutting down...")
             os.system("sleep 5")
             os.system("shutdown now")
     else:
         print(col("\n\n*******************************", "red"))
-        print(col("!!!!    ERRORI RILEVATI    !!!!", "red"))
+        print(col("!!!!    ERRORS DETECTED    !!!!", "red"))
         print(col("*******************************\n", "red"))
-        return 1
+        return -1
 
 
 #TODO renderlo più parlabile. Per ora dice solo "Errore lettura parametri"
-def leggiParams(): #throw Exception
+def read_params(): #throw Exception
 
     global IP_SSH
     global USER_SSH
@@ -99,35 +100,35 @@ def leggiParams(): #throw Exception
         if d == "log_folder":
             LOG_FOLDER  = data["params"]["log_folder"]
 
-def readPsw():
-    return getpass("Inserire password ssh: ")
+def read_psw():
+    return getpass("Insert ssh password for user "+USER_SSH+": ")
 
 
-def checkConnPI():
-    print("Controllo connessione con PI...")
+def check_conn_ssh():
+    print("Checking ssh connection...")
     ping = os.system("ping -c 1 "+IP_SSH+" > /dev/null 2>&1")
     if ping == 0:
-        print("PI acceso\n")
+        print(col("Connection ok\n","green"))
         return 0
     else:
-        print("PI NON RAGGIUNGIBILE. Impossibile continuare.")
+        print(col("Ssh host seems offline. Abort","red"))
         return -1
 
 
-def getShutdown():
-    inp = input("Spegnere il pc al termine? [Y/n] ")
+def get_shutdown():
+    inp = input("Shutdown pc at the end? [Y/n] ")
     if inp != "n" and inp != "N":
         return 1
     else:
         return 0 
 
 
-def selezioneCartelle():
+def select_folders():
     cart = []
-    print("Selezionare cartelle:")
+    print("Select folders/files:")
     for x in FOLDERS:
         while True:
-            inp = input("Backup di " + x +"? [y/n] ")
+            inp = input("Backup " + x +"? [y/n] ")
             if inp == "y" or inp == "Y":
                 cart.append(x)
                 break
