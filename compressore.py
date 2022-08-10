@@ -30,7 +30,7 @@ def start():
     print(col("\nSummary:", "cyan"))
     print(col("* Backup:", "cyan"))
     for c in cart:
-        subprocess.call(["du","-sh", c], shell=False)
+        subprocess.call(["/bin/du","-sh", c], shell=False)
 
     print(col("* Backup saved temporarily in "+SAVEFOLDER+"", "cyan"))
     print(col("* SCP to "+IP_SSH+"", "cyan"))
@@ -46,8 +46,8 @@ def start():
     for c in cart:
         nome_tar = SAVEFOLDER+"/"+c.split("/")[-1]+".tar"
         nome_tar_bz2 = nome_tar+".bz2"
-        res = subprocess.call(["tar", "-cvf", nome_tar, c], shell=False)
-        res = subprocess.call(["pbzip2", "-v","-f", "-p4", nome_tar], shell=False)
+        res = subprocess.call(["/bin/tar", "-cvf", nome_tar, c], shell=False)
+        res = subprocess.call(["/bin/pbzip2", "-v","-f", "-p4", nome_tar], shell=False)
         # res = os.system("tar -I \"pbzip2 -p4\" -cvf "+nome_tar+" "+c)
         if res != 0:
             print(col("\nERROR compression "+nome_tar+" failed. Abort","red"))
@@ -55,14 +55,14 @@ def start():
             break
         print(col("\n***** COMPRESSION COMPLETED *****\n","green"))
 
-        res = subprocess.call(["sshpass","-p", PASSW, "scp", "-v", nome_tar_bz2, USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH], shell=False)
+        res = subprocess.call(["/bin/sshpass","-p", PASSW, "scp", "-v", nome_tar_bz2, USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH], shell=False)
         # res = os.system("sshpass -p '"+PASSW+"' scp -v "+nome_tar+" "+USER_SSH+"@"+IP_SSH+":"+FOLDER_SSH)
         if res != 0:
             print(col("\nERROR send file "+c.split("/")[-1]+".tar.bz2 via ssh failed. Abort","red"))
             err=1
             break
         print(col("\n***** SEND SSH COMPLETED *****\n","green"))
-        subprocess.call(["rm", nome_tar_bz2], shell=False)
+        subprocess.call(["/bin/rm", nome_tar_bz2], shell=False)
         # os.system("rm "+nome_tar)
 
     if(err == 0):
@@ -72,7 +72,7 @@ def start():
         if shut == 1:
             print("Shutting down...")
             time.sleep(5)
-            subprocess.call(["shutdown", "now"], shell=False) 
+            subprocess.call(["/usr/sbin/shutdown", "now"], shell=False) 
     else:
         print(col("\n\n*******************************", "red"))
         print(col("!!!!     ERROR DETECTED    !!!!", "red"))
@@ -113,7 +113,7 @@ def read_psw():
 
 def check_conn_ssh():
     print("Checking ssh connection...")
-    ping = subprocess.call(["ping","-c 1", IP_SSH], stdout=subprocess.DEVNULL, shell=False)
+    ping = subprocess.call(["/bin/ping","-c 1", IP_SSH], stdout=subprocess.DEVNULL, shell=False)
     if ping == 0:
         print(col("Connection ok\n","green"))
         return 0
