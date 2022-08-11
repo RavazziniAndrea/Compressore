@@ -14,8 +14,11 @@ def start():
 
     try:
         read_params()
-    except:
-        print(col("Error reading parameters. Abort", "red"))
+    except FileNotFoundError:
+        print(col("Error file params.json not found. Abort", "red"))
+        return -1
+    except ValueError:
+        print(col("Error reading params. Abort", "red"))
         return -1
 
     if check_conn_ssh() == -1: return -1
@@ -97,13 +100,13 @@ def read_params(): #throw Exception
     for d in data["params"]:
         # if d == s:
         if d == "folder_to_backup":
-            FOLDERS     = data["params"]["folder_to_backup"]
+            FOLDERS = data["params"]["folder_to_backup"]
         if d == "tmp_store_folder":
-            SAVEFOLDER  = data["params"]["tmp_store_folder"]
+            SAVEFOLDER = data["params"]["tmp_store_folder"]
         if d == "ssh":
-            IP_SSH      = data["params"]["ssh"]["ip"]
-            USER_SSH    = data["params"]["ssh"]["user"]
-            FOLDER_SSH  = data["params"]["ssh"]["folder"]
+            IP_SSH = data["params"]["ssh"]["ip"]
+            USER_SSH = data["params"]["ssh"]["user"]
+            FOLDER_SSH = data["params"]["ssh"]["folder"]
         if d == "log_folder":
             LOG_FOLDER  = data["params"]["log_folder"]
 
