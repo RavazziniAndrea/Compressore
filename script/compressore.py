@@ -23,9 +23,9 @@ def start():
     printer("**   COMPRESSORE STARTED   **","green")
     printer("*****************************\n","green")
 
-    if SSH_ENABLED:
-        if check_conn_ssh() == -1: return -1
-        PASSW = read_psw()
+    # if SSH_ENABLED:
+    #     if check_conn_ssh() == -1: return -1
+    #     PASSW = read_psw()
 
     cart = select_folders()
     #TODO controllo che esistano le cartelle!!
@@ -54,8 +54,13 @@ def start():
     #COMPRESSIONE E INVIO
     err = 0
     for c in cart:
+        while c.endswith('/'):
+            c = c[:-1]
+
+        #TODO replace "/" with os.sep
         nome_tar = SAVEFOLDER+"/"+c.split("/")[-1]+".tar"
         nome_tar_bz2 = nome_tar+".bz2"
+
         start_time = dt.now()
         printer("\nStarting compression: {}".format(start_time), "white")
         printer("Compressing "+SAVEFOLDER+"/"+c.split("/")[-1]+"...", "white")
@@ -111,7 +116,8 @@ def read_params(): #throw Exception
     global LOG_ENABLED
     global LOG_FOLDER
 
-    f = open('../params.json')
+    f = open(os.path.abspath(os.pardir)+os.sep+'params.json')
+
 
     data = json.load(f)
 
