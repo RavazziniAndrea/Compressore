@@ -7,7 +7,7 @@
 
 <p align="center">
   <img alt="GitHub" src="https://img.shields.io/github/license/Ravazziniandrea/compressore">
-  <a href="https://www.codefactor.io/repository/github/ravazziniandrea/compressore"><img src="https://www.codefactor.io/repository/github/ravazziniandrea/compressore/badge" alt="CodeFactor" /></a>
+  <!--<a href="https://www.codefactor.io/repository/github/ravazziniandrea/compressore"><img src="https://www.codefactor.io/repository/github/ravazziniandrea/compressore/badge" alt="CodeFactor" /></a>-->
 </p>
 
 <p align="center">
